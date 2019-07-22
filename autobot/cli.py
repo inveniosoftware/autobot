@@ -7,61 +7,60 @@
 # Autobot is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-from .repos import check_repo, fetch_repo_info
-from .project_info import fetch_repo_maintainers
+from autobot.config import Config
+from autobot.api import BotAPI
 import sys
 import yaml
 import click
 from github3 import login, repository
-from dotenv import load_dotenv
-import os
-import time
 
 
-load_dotenv()
-token = os.getenv('GH_TOKEN')
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+def main():
+    pass
 
 
-GH_CLIENT = login(token=token)
+@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+def report():
+    pass
 
 
 @click.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('--project', default='inveniosoftware',
-              help='Related project (default=inveniosoftware).')
-@click.option('--repos', multiple=True,
-              help='The repositories to check for notifications.')
-@click.option('--maintainers', multiple=True,
-              help='The maintainers to notify.')
-@click.option('--count', default=-1,
-              help='How many repositories to check.')
-def main(project, repos, maintainers, count):
-    tstart = time.time()
-    repo_maintainers = fetch_repo_maintainers(repos, maintainers)
-    repo_actions = {'repos': []}
-    for repo in repo_maintainers.keys():
-        count -= 1
-        start = time.time()
-        print(f'Starting with repo {repo}...')
-        repo_obj = GH_CLIENT.repository(project, repo)
-        repo_actions['repos'].append(
-            {
-                **{
-                    'actions':
-                    check_repo(repo_obj, repo_maintainers[repo])
-                },
-                **fetch_repo_info(repo_obj)
-            }
-        )
-        print(f'Done.')
-        end = time.time()
-        print(f'{end - start} sec')
-        if (count == 0):
-            break
+@click.option('--owner', default='inveniosoftware', help='The repo owner we plan to offer the service to.')
+@click.option('--repo', multiple=True, help='The repositories to check for notifications.')
+@click.option('--maintainer', multiple=True, help='The maintainers to notify.')
+@click.option('--format', default='json', help='The result format.')
+def show(owner, repo, maintainer, format):
+    conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
+    bot = BotAPI(conf)
+    res = bot.report
     with open('results.yml', 'w') as outfile:
-        yaml.dump(repo_actions, outfile, default_flow_style=False)
-    tend = time.time()
-    print(f'Total execution time: {tend - tstart} sec')
+        yaml.dump(res, outfile, default_flow_style=False)
+    if format == 'json':
+        print(res)
+    elif format == 'yaml':
+        print(yaml.dump(res))
     return 0
+
+
+@click.command(context_settings=dict(help_option_names=['-h', '--help']))
+@click.option('--owner', default='inveniosoftware', help='The repo owner we plan to offer the service to.')
+@click.option('--repo', multiple=True, help='The repositories to check for notifications.')
+@click.option('--maintainer', multiple=True, help='The maintainers to notify.')
+@click.option('--via', default='gitter', help='Resource used for notification dispatch.')
+def send(owner, repo, maintainer, via):
+    conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
+    bot = BotAPI(conf)
+    for m in conf._load_maintainers().keys():
+        if via == 'gitter':
+            bot.send_report(m, 'markdown')
+    return 0
+
+
+main.add_command(report)
+
+report.add_command(show)
+report.add_command(send)
 
 
 if __name__ == "__main__":
