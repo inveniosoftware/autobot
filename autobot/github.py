@@ -269,7 +269,7 @@ class GitHubAPI:
         return res
 
 
-    def _report(self, repos, maintainers):
+    def _report(self, repos):
         """Check a repository for possible actions."""
 
         res = []
@@ -278,7 +278,7 @@ class GitHubAPI:
             repo_obj = self.GH_CLIENT.repository(self.owner, repo)
             actions['repos'].append(
                 {
-                    **{'actions': self._repo_report(repo_obj, maintainers)},
+                    **{'actions': self._repo_report(repo_obj, repos[repo])},
                     **self.fetch_repo_info(repo_obj)
                 }
             )

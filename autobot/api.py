@@ -16,13 +16,13 @@ class BotAPI:
 
     def __init__(self, config: Config):
         self.config = config
+        self.report = GitHubAPI(self.config)._report(self.config._load_repositories())
 
 
     def generate_report(self, maintainer: str) -> dict:
         """Generates a report for a maintainer."""
-
-        maintainers = self.config._load_maintainers()
-        return GitHubAPI(self.config)._report(maintainers[maintainer], [maintainer])
+        res = self.report
+        return res
 
 
     def send_report(self, maintainer: str, report):
