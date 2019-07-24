@@ -8,4 +8,4 @@
 
 """Top-level package for Autobot."""
 
-__version__ = '0.1.0'
+__version__ = "0.1.0"

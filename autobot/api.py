@@ -11,6 +11,7 @@
 from autobot.config import Config
 from autobot.github import GitHubAPI
 
+
 class BotAPI:
     """Generates report."""
 
@@ -18,19 +19,19 @@ class BotAPI:
         self.config = config
         self.report = GitHubAPI(self.config)._report(self.config._load_repositories())
 
-
     def generate_report(self, maintainer: str) -> dict:
         """Generates a report for a maintainer."""
 
-        res = self.report[0]['repos']
+        res = self.report[0]["repos"]
         print(res)
-        print('---------------------------------------------------------------------------------')
+        print(
+            "---------------------------------------------------------------------------------"
+        )
         return res
-
 
     def send_report(self, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
 
         res = self.generate_report(maintainer)
-        if format == 'markdown':
+        if format == "markdown":
             """ TO DO """

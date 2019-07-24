@@ -9,11 +9,9 @@
 """Tests for `autobot` package."""
 
 import pytest
-
 from click.testing import CliRunner
 
-from autobot import autobot
-from autobot import cli
+from autobot import autobot, cli
 
 
 @pytest.fixture
@@ -37,7 +35,7 @@ def test_command_line_interface():
     runner = CliRunner()
     result = runner.invoke(cli.main)
     assert result.exit_code == 0
-    assert 'autobot.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
+    assert "autobot.cli.main" in result.output
+    help_result = runner.invoke(cli.main, ["--help"])
     assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
+    assert "--help  Show this message and exit." in help_result.output
