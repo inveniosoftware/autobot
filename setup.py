@@ -36,7 +36,12 @@ for name, reqs in extras_require.items():
 
 setup_requires = ["pytest-runner>=2.6.2"]
 
-install_requires = ["github3.py>=0.9.3", "click>=7.0"]
+install_requires = [
+    "github3.py>=0.9.3",
+    "click>=7.0",
+    "PyYAML>=3.13",
+    "python-dotenv>=0.10.3",
+]
 
 setup(
     author="CERN",

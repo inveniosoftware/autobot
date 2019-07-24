@@ -11,7 +11,7 @@
 import pytest
 from click.testing import CliRunner
 
-from autobot import autobot, cli
+from autobot import cli
 
 
 @pytest.fixture

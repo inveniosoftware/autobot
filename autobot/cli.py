@@ -7,6 +7,8 @@
 # Autobot is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
+"""Cli commands."""
+
 import sys
 
 import click
@@ -19,11 +21,13 @@ from autobot.config import Config
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 def main():
+    """Autobot cli."""
     pass
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 def report():
+    """Autobot report cli."""
     pass
 
 
@@ -39,6 +43,7 @@ def report():
 @click.option("--maintainer", multiple=True, help="The maintainers to notify.")
 @click.option("--format", default="json", help="The result format.")
 def show(owner, repo, maintainer, format):
+    """Autobot report show cli."""
     conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
     bot = BotAPI(conf)
     res = bot.report
@@ -65,6 +70,7 @@ def show(owner, repo, maintainer, format):
     "--via", default="gitter", help="Resource used for notification dispatch."
 )
 def send(owner, repo, maintainer, via):
+    """Autobot report send cli."""
     conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
     bot = BotAPI(conf)
     for m in conf._load_maintainers().keys():

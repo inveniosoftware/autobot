@@ -14,13 +14,12 @@ Welcome to Autobot's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   readme
    installation
    usage
-   modules
    contributing
    authors
-   history
+   license
+   changes
 
 Indices and tables
 ==================

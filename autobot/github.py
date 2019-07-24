@@ -18,11 +18,15 @@ from autobot.config import Config
 
 
 class GitHubAPI:
+    """Perform requests for the target repositories."""
+
     def __init__(self, config: Config):
+        """Github client initialization."""
         self.owner = config.owner
         self.GH_CLIENT = login(token=config.GITHUB_TOKEN)
 
     def fetch_comment_info(self, comment):
+        """Fetch information for a comment."""
         return {
             "url": comment.html_url,
             "creation_date": comment.created_at,
@@ -30,6 +34,7 @@ class GitHubAPI:
         }
 
     def fetch_pr_info(self, pr):
+        """Fetch information for a pull request."""
         return {
             "id": pr.number,
             "url": pr.html_url,
@@ -49,6 +54,7 @@ class GitHubAPI:
         }
 
     def fetch_issue_info(self, issue):
+        """Fetch information for an issue."""
         return {
             "id": issue.number,
             "url": issue.html_url,
@@ -64,6 +70,7 @@ class GitHubAPI:
         }
 
     def fetch_repo_info(self, repo):
+        """Fetch information for a repository."""
         return {
             "url": repo.clone_url,
             "creation_date": repo.created_at,
@@ -77,6 +84,7 @@ class GitHubAPI:
         }
 
     def check_mentions(self, m, maintainers):
+        """Check if someone in `maintainers` list was mentioned in `m`."""
         res = []
         mentions = list(
             filter(
@@ -89,12 +97,14 @@ class GitHubAPI:
         return res
 
     def check_mergeable(self, pr, maintainers):
+        """Check if pull request `pr` is mergeable."""
         res = []
         if pr.refresh().mergeable:
             res.append({"Merge this!": maintainers})
         return res
 
     def check_review(self, pr, maintainers):
+        """Check if pull request `pr` needs a review."""
         res = []
         requested_reviewers = list(
             filter(
@@ -108,18 +118,21 @@ class GitHubAPI:
         return res
 
     def check_if_connected_with_issue(self, pr, maintainers):
+        """Check if pull request `pr` is connected to some issue."""
         res = []
         if pr.issue() is None:
             res.append({"Resolve not connected with issue!": maintainers})
         return res
 
     def check_close(self, pr, maintainers):
+        """Check if pull request `pr` should be closed due to inaction."""
         res = []
         if (datetime.utcnow().replace(tzinfo=pytz.utc) - pr.updated_at).days >= 3 * 30:
             res.append({"Close this!": maintainers})
         return res
 
     def check_follow_up(self, pr, maintainers):
+        """Check if someone should follow up on pull request `pr` due to inaction."""
         res = []
         if ("WIP" in pr.title) and (
             (datetime.utcnow().replace(tzinfo=pytz.utc) - pr.updated_at).days >= 1 * 30
@@ -128,12 +141,14 @@ class GitHubAPI:
         return res
 
     def check_labels(self, issue, maintainers):
+        """Check issue's `issue` labels."""
         res = []
         if list(filter(lambda label: label.name == "RFC", issue.labels())):
             res.append({"Skip this for now!": maintainers})
         return res
 
     def check_comments(self, issue, maintainers):
+        """Check if a response for an issue's `issue` comment is needed."""
         res = []
         comments = [comment for comment in issue.comments()]
         if comments and comments[-1].user.login not in maintainers:
@@ -155,7 +170,6 @@ class GitHubAPI:
 
     def _comment_report(self, comment, maintainers):
         """Check a comment for possible actions."""
-
         res = []
         for f in self.comment_filters:
             res += f(self, comment, maintainers)
@@ -163,7 +177,6 @@ class GitHubAPI:
 
     def _pr_report(self, pr, maintainers):
         """Check a pull request for possible actions."""
-
         res = []
         for f in self.pr_filters:
             res += f(self, pr, maintainers)
@@ -185,7 +198,6 @@ class GitHubAPI:
 
     def _issue_report(self, issue, maintainers):
         """Check an issue for possible actions."""
-
         res = []
         for f in self.issue_filters:
             res += f(self, issue, maintainers)
@@ -200,7 +212,6 @@ class GitHubAPI:
 
     def _repo_report(self, repo, maintainers):
         """Check a repository for possible actions."""
-
         res = []
         actions = {"prs": []}
         for pr in repo.pull_requests():
@@ -225,7 +236,6 @@ class GitHubAPI:
     @lazy_func
     def _report(self, repos):
         """Check a repository for possible actions."""
-
         res = []
         actions = {"repos": []}
         for repo in repos:

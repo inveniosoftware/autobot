@@ -19,7 +19,9 @@ dist: xenial
 python: 3.7
 
 cache:
-  pip
+  directories:
+  - $HOME/virtualenv/python3.6.*
+  - $HOME/.cache/pip
 
 matrix:
   fast_finish: true
@@ -30,7 +32,6 @@ env:
   - REQUIREMENTS=lowest
   - REQUIREMENTS=release
   - REQUIREMENTS=devel
-
 
 before_install:
   - "travis_retry pip install --upgrade pip setuptools py"
@@ -44,6 +45,7 @@ install:
   - "travis_retry pip install -e .[all]"
 
 script: ./run-tests.sh
+
 
 after_success:
   - coveralls

@@ -16,12 +16,12 @@ class BotAPI:
     """Generates report."""
 
     def __init__(self, config: Config):
+        """Bot initialization."""
         self.config = config
         self.report = GitHubAPI(self.config)._report(self.config._load_repositories())
 
     def generate_report(self, maintainer: str) -> dict:
         """Generates a report for a maintainer."""
-
         res = self.report[0]["repos"]
         print(res)
         print(
@@ -31,7 +31,6 @@ class BotAPI:
 
     def send_report(self, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
-
         res = self.generate_report(maintainer)
         if format == "markdown":
             """ TO DO """

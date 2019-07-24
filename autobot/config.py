@@ -20,6 +20,7 @@ class Config:
     """Loads config from environment and files."""
 
     def __init__(self, owner: str, **kwargs):
+        """Config initialization."""
         self.owner = owner
         self.repos = kwargs.get("repos", None)
         self.maintainers = kwargs.get("maintainers", None)
@@ -30,12 +31,10 @@ class Config:
 
     def _load_repositories_yml(self):
         """Load repository.yml file."""
-
         return yaml.load(open(self.INFO_PATH))["orgs"][self.owner]
 
     def _load_repositories(self):
         """Load repository.yml file into dictionary with repositories as keys."""
-
         info = self._load_repositories_yml()
         res = {
             repo: info["repositories"][repo]["maintainers"]
@@ -51,6 +50,7 @@ class Config:
         return {r: m for r, m in res.items() if m}
 
     def _invert_list_dict(self, d):
+        """Invert dictionary `d`."""
         keys = list(set([k for val in d.values() for k in val]))
         res = dict.fromkeys(keys)
         for k in res.keys():
@@ -59,6 +59,5 @@ class Config:
 
     def _load_maintainers(self):
         """Load repository.yml file into dictionary with maintainers as keys."""
-
         info = self._load_repositories()
         return self._invert_list_dict(info)
