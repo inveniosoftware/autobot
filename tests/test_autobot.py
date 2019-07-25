@@ -8,34 +8,38 @@
 
 """Tests for `autobot` package."""
 
-import pytest
-from click.testing import CliRunner
-
-from autobot import cli
+import os
+import sys
 
 
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
+def test_config_content(config):
+    """Test configuration content."""
+    assert isinstance(config.owner, str)
+    assert isinstance(config.GITHUB_TOKEN, str)
+    assert isinstance(config.INFO_PATH, str)
+    assert os.path.isfile(os.path.join(os.path.dirname(__file__), config.INFO_PATH))
+    assert isinstance(config.repos, list)
+    for repo in config.repos:
+        assert isinstance(repo, str)
+    assert isinstance(config.maintainers, list)
+    for maintainer in config.maintainers:
+        assert isinstance(maintainer, str)
+    maintainers = config._load_maintainers()
+    assert isinstance(maintainers, dict)
+    for i in maintainers.items():
+        assert isinstance(i[0], str)
+        assert isinstance(i[1], list)
+        for val in i[1]:
+            assert isinstance(val, str)
+    repos = config._load_repositories()
+    assert isinstance(repos, dict)
+    for i in repos.items():
+        assert isinstance(i[0], str)
+        assert isinstance(i[1], list)
+        for val in i[1]:
+            assert isinstance(val, str)
 
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
 
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-
-
-def test_command_line_interface():
-    """Test the CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert "autobot.cli.main" in result.output
-    help_result = runner.invoke(cli.main, ["--help"])
-    assert help_result.exit_code == 0
-    assert "--help  Show this message and exit." in help_result.output
+def test_cli(config):
+    """Test cli commands."""
+    pass

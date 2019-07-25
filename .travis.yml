@@ -19,14 +19,12 @@ dist: xenial
 python: 3.7
 
 cache:
-  directories:
-  - $HOME/virtualenv/python3.6.*
-  - $HOME/.cache/pip
+  - pip
 
 matrix:
   fast_finish: true
   allow_failures:
-    - env: REQUIREMENTS=dev
+    - env: REQUIREMENTS=devel
 
 env:
   - REQUIREMENTS=lowest

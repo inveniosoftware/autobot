@@ -7,7 +7,7 @@
 # Autobot is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-"""Cli commands."""
+"""CLI commands."""
 
 import sys
 
@@ -44,7 +44,9 @@ def report():
 @click.option("--format", default="json", help="The result format.")
 def show(owner, repo, maintainer, format):
     """Autobot report show cli."""
-    conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
+    conf = Config(
+        owner=owner, repos=[r for r in repo], maintainers=[m for m in maintainer]
+    )
     bot = BotAPI(conf)
     res = bot.report
     with open("results.yml", "w") as outfile:
@@ -71,7 +73,9 @@ def show(owner, repo, maintainer, format):
 )
 def send(owner, repo, maintainer, via):
     """Autobot report send cli."""
-    conf = Config(owner, repos=[r for r in repo], maintainers=[m for m in maintainer])
+    conf = Config(
+        owner=owner, repos=[r for r in repo], maintainers=[m for m in maintainer]
+    )
     bot = BotAPI(conf)
     for m in conf._load_maintainers().keys():
         if via == "gitter":

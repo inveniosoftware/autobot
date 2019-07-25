@@ -41,6 +41,7 @@ install_requires = [
     "click>=7.0",
     "PyYAML>=3.13",
     "python-dotenv>=0.10.3",
+    "lazy-load>=0.8.2",
 ]
 
 setup(

@@ -13,19 +13,20 @@ import os
 import yaml
 from dotenv import load_dotenv
 
-load_dotenv()
-
 
 class Config:
     """Loads config from environment and files."""
 
-    def __init__(self, owner: str, **kwargs):
+    def __init__(self, **kwargs):
         """Config initialization."""
-        self.owner = owner
-        self.repos = kwargs.get("repos", None)
-        self.maintainers = kwargs.get("maintainers", None)
-        self.GITHUB_TOKEN = os.getenv("GH_TOKEN")
-        self.INFO_PATH = os.getenv(owner.upper() + "_INFO")
+        load_dotenv()
+        self.owner = kwargs.get("owner", os.getenv("OWNER"))
+        self.repos = kwargs.get("repos", [])
+        self.maintainers = kwargs.get("maintainers", [])
+        self.GITHUB_TOKEN = kwargs.get("github_token", os.getenv("GH_TOKEN"))
+        self.INFO_PATH = kwargs.get(
+            "info_path", os.getenv(self.owner.upper() + "_INFO")
+        )
         self.GITTER_TOKEN = "CHANGE_ME"
         self.MAIL_SETTINGS = {...}
 
