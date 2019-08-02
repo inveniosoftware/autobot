@@ -8,29 +8,77 @@
 
 """Autobot API."""
 
-from autobot.config import Config
+import yaml
+
+from autobot.config_loader import Config
 from autobot.github import GitHubAPI
 
 
 class BotAPI:
     """Generates report."""
 
-    def __init__(self, config: Config):
+    @classmethod
+    def __init__(cls, config: Config):
         """Bot initialization."""
-        self.config = config
-        self.report = GitHubAPI(self.config)._report(self.config._load_repositories())
+        cls.config = config.config
+        cls.report = GitHubAPI(
+            cls.config["AUTOBOT_OWNER"], cls.config["AUTOBOT_GH_TOKEN"]
+        ).report(cls.load_repositories())
 
-    def generate_report(self, maintainer: str) -> dict:
+    @classmethod
+    def generate_report(cls, maintainer: str) -> dict:
         """Generates a report for a maintainer."""
-        res = self.report[0]["repos"]
+        res = cls.report[0]["repos"]
         print(res)
         print(
             "---------------------------------------------------------------------------------"
         )
         return res
 
-    def send_report(self, maintainer: str, format: str):
+    @classmethod
+    def send_report(cls, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
-        res = self.generate_report(maintainer)
+        res = cls.generate_report(maintainer)
         if format == "markdown":
             """ TO DO """
+
+    @classmethod
+    def load_repositories_yml(cls):
+        """Load repository.yml file."""
+        return yaml.load(open(cls.config["AUTOBOT_INFO_PATH"]))["orgs"][
+            cls.config["AUTOBOT_OWNER"]
+        ]
+
+    @classmethod
+    def load_repositories(cls):
+        """Load repository.yml file into dictionary with repositories as keys."""
+        info = cls.load_repositories_yml()
+        res = {
+            repo: info["repositories"][repo]["maintainers"]
+            for repo in info["repositories"].keys()
+        }
+        if cls.config["AUTOBOT_REPOS"]:
+            res = {repo: res[repo] for repo in cls.config["AUTOBOT_REPOS"]}
+        if cls.config["AUTOBOT_MAINTAINERS"]:
+            res = {
+                repo: list(
+                    filter(lambda m: m in res[repo], cls.config["AUTOBOT_MAINTAINERS"])
+                )
+                for repo in res.keys()
+            }
+        return {r: m for r, m in res.items() if m}
+
+    @classmethod
+    def invert_list_dict(cls, d):
+        """Invert dictionary `d`."""
+        keys = list(set([k for val in d.values() for k in val]))
+        res = dict.fromkeys(keys)
+        for k in res.keys():
+            res[k] = [val for (val, l) in d.items() if k in l]
+        return res
+
+    @classmethod
+    def load_maintainers(cls):
+        """Load repository.yml file into dictionary with maintainers as keys."""
+        info = cls.load_repositories()
+        return cls.invert_list_dict(info)

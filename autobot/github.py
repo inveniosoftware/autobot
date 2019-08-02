@@ -14,16 +14,16 @@ import pytz
 from github3 import login, repository
 from lazy_load import lazy_func
 
-from autobot.config import Config
+from autobot.config_loader import Config
 
 
 class GitHubAPI:
     """Perform requests for the target repositories."""
 
-    def __init__(self, config: Config):
+    def __init__(self, owner, gh_token):
         """Github client initialization."""
-        self.owner = config.owner
-        self.GH_CLIENT = login(token=config.GITHUB_TOKEN)
+        self.OWNER = owner
+        self.GH_CLIENT = login(token=gh_token)
 
     def fetch_comment_info(self, comment):
         """Fetch information for a comment."""
@@ -168,56 +168,56 @@ class GitHubAPI:
 
     issue_filters = [check_labels, check_comments, check_mentions]
 
-    def _comment_report(self, comment, maintainers):
+    def comment_report(self, comment, maintainers):
         """Check a comment for possible actions."""
         res = []
         for f in self.comment_filters:
             res += f(self, comment, maintainers)
         return res
 
-    def _pr_report(self, pr, maintainers):
+    def pr_report(self, pr, maintainers):
         """Check a pull request for possible actions."""
         res = []
         for f in self.pr_filters:
             res += f(self, pr, maintainers)
         actions = {"review_comments": []}
         for comment in pr.review_comments():
-            report = self._comment_report(comment, maintainers)
+            report = self.comment_report(comment, maintainers)
             actions["review_comments"].append(
                 {**{"actions": report}, **self.fetch_comment_info(comment)}
             ) if report else None
         res.append(actions) if actions["review_comments"] else None
         actions = {"issue_comments": []}
         for comment in pr.issue_comments():
-            report = self._comment_report(comment, maintainers)
+            report = self.comment_report(comment, maintainers)
             actions["issue_comments"].append(
                 {**{"actions": report}, **self.fetch_comment_info(comment)}
             ) if report else None
         res.append(actions) if actions["issue_comments"] else None
         return res
 
-    def _issue_report(self, issue, maintainers):
+    def issue_report(self, issue, maintainers):
         """Check an issue for possible actions."""
         res = []
         for f in self.issue_filters:
             res += f(self, issue, maintainers)
         actions = {"comments": []}
         for comment in issue.comments():
-            report = self._comment_report(comment, maintainers)
+            report = self.comment_report(comment, maintainers)
             actions["comments"].append(
                 {**{"actions": report}, **self.fetch_comment_info(comment)}
             ) if report else None
         res.append(actions) if actions["comments"] else None
         return res
 
-    def _repo_report(self, repo, maintainers):
+    def repo_report(self, repo, maintainers):
         """Check a repository for possible actions."""
         res = []
         actions = {"prs": []}
         for pr in repo.pull_requests():
             if pr.state != "open":
                 continue
-            report = self._pr_report(pr, maintainers)
+            report = self.pr_report(pr, maintainers)
             actions["prs"].append(
                 {**{"actions": report}, **self.fetch_pr_info(pr)}
             ) if report else None
@@ -226,7 +226,7 @@ class GitHubAPI:
         for issue in repo.issues():
             if issue.state != "open":
                 continue
-            report = self._issue_report(issue, maintainers)
+            report = self.issue_report(issue, maintainers)
             actions["issues"].append(
                 {**{"actions": report}, **self.fetch_issue_info(issue)}
             ) if report else None
@@ -234,13 +234,13 @@ class GitHubAPI:
         return res
 
     @lazy_func
-    def _report(self, repos):
+    def report(self, repos):
         """Check a repository for possible actions."""
         res = []
         actions = {"repos": []}
         for repo in repos:
-            repo_obj = self.GH_CLIENT.repository(self.owner, repo)
-            report = self._repo_report(repo_obj, repos[repo])
+            repo_obj = self.GH_CLIENT.repository(self.OWNER, repo)
+            report = self.repo_report(repo_obj, repos[repo])
             actions["repos"].append(
                 {**{"actions": report}, **self.fetch_repo_info(repo_obj)}
             ) if report else None
