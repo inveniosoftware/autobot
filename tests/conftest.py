@@ -78,20 +78,13 @@ def info(tmpdir_factory):
 
 
 @pytest.fixture
-def config(info, **kwargs):
+def config(info):
     """Configuration testing fixture."""
-    from autobot.config import Config
-
-    owner = kwargs.get("owner", "org1")
-    repos = kwargs.get("repos", [])
-    maintainers = kwargs.get("maintainers", [])
-    github_token = kwargs.get("github_token", "some token")
-    info_path = kwargs.get("info_path", info)
+    from autobot.config_loader import Config
 
     return Config(
-        owner=owner,
-        repos=repos,
-        maintainers=maintainers,
-        github_token=github_token,
-        info_path=info_path,
-    )
+        AUTOBOT_OWNER="org1",
+        AUTOBOT_INFO_PATH=info,
+        AUTOBOT_GH_TOKEN="some gh token",
+        AUTOBOT_GITTER_TOKEN="some gitter token",
+    ).config

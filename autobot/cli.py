@@ -16,7 +16,7 @@ import yaml
 from github3 import login, repository
 
 from autobot.api import BotAPI
-from autobot.config import Config
+from autobot.config_loader import Config
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
@@ -45,12 +45,14 @@ def report():
 def show(owner, repo, maintainer, format):
     """Autobot report show cli."""
     conf = Config(
-        owner=owner, repos=[r for r in repo], maintainers=[m for m in maintainer]
+        AUTOBOT_OWNER=owner,
+        AUTOBOT_REPOS=[r for r in repo],
+        AUTOBOT_MAINTAINERS=[m for m in maintainer],
     )
     bot = BotAPI(conf)
     res = bot.report
-    with open("results.yml", "w") as outfile:
-        yaml.dump(res, outfile, default_flow_style=False)
+    # with open("results.yml", "w") as outfile:
+    #     yaml.dump(res, outfile, default_flow_style=False)
     if format == "json":
         print(res)
     elif format == "yaml":
@@ -74,10 +76,12 @@ def show(owner, repo, maintainer, format):
 def send(owner, repo, maintainer, via):
     """Autobot report send cli."""
     conf = Config(
-        owner=owner, repos=[r for r in repo], maintainers=[m for m in maintainer]
+        AUTOBOT_OWNER=owner,
+        AUTOBOT_REPOS=[r for r in repo],
+        AUTOBOT_MAINTAINERS=[m for m in maintainer],
     )
     bot = BotAPI(conf)
-    for m in conf._load_maintainers().keys():
+    for m in bot.load_maintainers().keys():
         if via == "gitter":
             bot.send_report(m, "markdown")
     return 0

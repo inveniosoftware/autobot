@@ -6,59 +6,84 @@
 # Autobot is free software; you can redistribute it and/or modify it
 # under the terms of the MIT License; see LICENSE file for more details.
 
-"""Configuration options for Autobot."""
+"""The details of the configuration options for Autobot (deafult values given)."""
 
-import os
+AUTOBOT_GH_TOKEN = "CHANGE ME"
+"""The github token used for making requests to the github API.
 
-import yaml
-from dotenv import load_dotenv
+    It **must** be a none empty string corresponding to a valid github token.
+"""
 
+AUTOBOT_GITTER_TOKEN = "CHANGE ME"
+"""The gitter token used for sending the generated report via gitter API.
 
-class Config:
-    """Loads config from environment and files."""
+    It **must** be a none empty string corresponding to a valid gitter token.
+"""
 
-    def __init__(self, **kwargs):
-        """Config initialization."""
-        load_dotenv()
-        self.owner = kwargs.get("owner", os.getenv("OWNER"))
-        self.repos = kwargs.get("repos", [])
-        self.maintainers = kwargs.get("maintainers", [])
-        self.GITHUB_TOKEN = kwargs.get("github_token", os.getenv("GH_TOKEN"))
-        self.INFO_PATH = kwargs.get(
-            "info_path", os.getenv(self.owner.upper() + "_INFO")
-        )
-        self.GITTER_TOKEN = "CHANGE_ME"
-        self.MAIL_SETTINGS = {...}
+AUTOBOT_INFO_PATH = "autobot/opensource/repositories.yml"
+"""The path to the **yaml** file that contains the information about the organization we provide the service for.
 
-    def _load_repositories_yml(self):
-        """Load repository.yml file."""
-        return yaml.load(open(self.INFO_PATH))["orgs"][self.owner]
+    It **must** be a none empty string corresponding to the direcotry of a yaml file of the following structure:
 
-    def _load_repositories(self):
-        """Load repository.yml file into dictionary with repositories as keys."""
-        info = self._load_repositories_yml()
-        res = {
-            repo: info["repositories"][repo]["maintainers"]
-            for repo in info["repositories"].keys()
+    .. code-block:: python
+
+    info = {
+        "orgs": {
+            "valid organization name here": {
+                "repositories": {
+                    "valid repository name here": {
+                        "maintainers": # maintainers list,
+                        "some attribute": # corresponding value,
+                        "some other attribute": # corresponding value,
+                        # and so on ...
+                    },
+                    "valid repository name here": {
+                        "maintainers": # maintainers list,
+                        "some attribute": # corresponding value,
+                        "some other attribute": # corresponding value,
+                        # and so on ...
+                    },
+                    # and so on ...
+                }
+            },
+            "valid organization name here": {
+                "repositories": {
+                    "valid repository name here": {
+                        "maintainers": # maintainer list,
+                        "some attribute": # corresponding value,
+                        "some other attribute": # corresponding value,
+                        # and so on ...
+                    },
+                    "valid repository name here": {
+                        "maintainers": # maintainer list,
+                        "some attribute": # corresponding value,
+                        "some other attribute": # corresponding value,
+                        # and so on ...
+                    },
+                    # and so on ...
+                }
+            },
+            # and so on ...
         }
-        if self.repos:
-            res = {repo: res[repo] for repo in self.repos}
-        if self.maintainers:
-            res = {
-                repo: list(filter(lambda m: m in res[repo], self.maintainers))
-                for repo in res.keys()
-            }
-        return {r: m for r, m in res.items() if m}
+    }
+"""
 
-    def _invert_list_dict(self, d):
-        """Invert dictionary `d`."""
-        keys = list(set([k for val in d.values() for k in val]))
-        res = dict.fromkeys(keys)
-        for k in res.keys():
-            res[k] = [val for (val, l) in d.items() if k in l]
-        return res
+# AUTOBOT_MAIL_SETTINGS={}
 
-    def _load_maintainers(self):
-        """Load repository.yml file into dictionary with maintainers as keys."""
-        info = self._load_repositories()
-        return self._invert_list_dict(info)
+AUTOBOT_MAINTAINERS = []
+"""A string list of the github users that are listed as maintainers (see ``AUTOBOT_INFO_PATH``) of the repositories of interest (see ``AUTOBOT_REPOS``).
+
+    Every item of the list **must** be a none empty string corresponding to a valid github user.
+"""
+
+AUTOBOT_OWNER = "inveniosoftware"
+"""The name of the organization we provide the service for.
+
+    It **must** be a none empty string corresponding to a valid github user.
+"""
+
+AUTOBOT_REPOS = []
+"""A string list of the github repositories to generate reports for.
+
+    Every item of the list **must** be a none empty string corresponding to a valid github repository owned by ``AUTOBOT_OWNER``.
+"""
