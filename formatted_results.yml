@@ -1,0 +1,26 @@
+- actions:
+    Merge this!:
+    - maintainers: [jma, kprzerwa, ludmilamarian, ntarocco, topless, zzacharo]
+      pr:
+        creation_date: &id001 2019-08-09 07:05:28+00:00
+        description: "\r\n* Improves checkout and extend to accept timedelta duration."
+        id: 117
+        related_issue: https://api.github.com/repos/inveniosoftware/invenio-circulation/issues/117
+        state: open
+        title: 'transations: allow checkout and renewals in timedelta'
+        url: https://github.com/inveniosoftware/invenio-circulation/pull/117
+        user: &id002 {name: BadrAly, url: 'https://github.com/BadrAly'}
+    Review this!:
+    - maintainers: [jma, kprzerwa, ntarocco, topless, zzacharo]
+      pr:
+        creation_date: *id001
+        description: "\r\n* Improves checkout and extend to accept timedelta duration."
+        id: 117
+        related_issue: https://api.github.com/repos/inveniosoftware/invenio-circulation/issues/117
+        state: open
+        title: 'transations: allow checkout and renewals in timedelta'
+        url: https://github.com/inveniosoftware/invenio-circulation/pull/117
+        user: *id002
+  repo: {creation_date: !!timestamp '2018-07-04 11:43:58+00:00', description: Library
+      circulation module for Invenio., url: 'https://github.com/inveniosoftware/invenio-circulation'}
+

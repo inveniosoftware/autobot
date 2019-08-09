@@ -12,8 +12,8 @@ import os
 import sys
 
 
-def test_config_content(config):
-    """Test configuration content."""
+def test_config(config):
+    """Check configuration content."""
     assert isinstance(config, dict)
     assert isinstance(config["AUTOBOT_GH_TOKEN"], str)
     assert isinstance(config["AUTOBOT_GITTER_TOKEN"], str)
@@ -28,3 +28,8 @@ def test_config_content(config):
     assert isinstance(config["AUTOBOT_REPOS"], list)
     for repo in config["AUTOBOT_REPOS"]:
         assert isinstance(repo, str)
+
+
+def test_bot_report(api):
+    """Check the bot generated report."""
+    pass
