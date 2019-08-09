@@ -10,6 +10,7 @@
 """CLI commands."""
 
 import sys
+import os
 
 import click
 import yaml
@@ -18,16 +19,20 @@ from github3 import login, repository
 from autobot.api import BotAPI
 from autobot.config_loader import Config
 
+dotenv_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), ".env")
+
+ini_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), "config.ini")
+
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 def main():
-    """Autobot cli."""
+    """Autobot CLI."""
     pass
 
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 def report():
-    """Autobot report cli."""
+    """Autobot report CLI."""
     pass
 
 
@@ -43,54 +48,56 @@ def report():
 @click.option("--maintainer", multiple=True, help="The maintainers to notify.")
 @click.option("--format", default="json", help="The result format.")
 def show(owner, repo, maintainer, format):
-    """Autobot report show cli."""
-    conf = Config(
+    """Autobot report show CLI."""
+    conf = Config.load(
         AUTOBOT_OWNER=owner,
         AUTOBOT_REPOS=[r for r in repo],
         AUTOBOT_MAINTAINERS=[m for m in maintainer],
+        env=dotenv_path,
+        ini=ini_path,
+        defaults=True,
     )
     bot = BotAPI(conf)
-    res = bot.report
-    # with open("results.yml", "w") as outfile:
-    #     yaml.dump(res, outfile, default_flow_style=False)
-    if format == "json":
-        print(res)
-    elif format == "yaml":
-        print(yaml.dump(res))
+    res = bot.formatted_report(format)
+    print(res)
     return 0
 
 
-@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
-@click.option(
-    "--owner",
-    default="inveniosoftware",
-    help="The repo owner we plan to offer the service to.",
-)
-@click.option(
-    "--repo", multiple=True, help="The repositories to check for notifications."
-)
-@click.option("--maintainer", multiple=True, help="The maintainers to notify.")
-@click.option(
-    "--via", default="gitter", help="Resource used for notification dispatch."
-)
-def send(owner, repo, maintainer, via):
-    """Autobot report send cli."""
-    conf = Config(
-        AUTOBOT_OWNER=owner,
-        AUTOBOT_REPOS=[r for r in repo],
-        AUTOBOT_MAINTAINERS=[m for m in maintainer],
-    )
-    bot = BotAPI(conf)
-    for m in bot.load_maintainers().keys():
-        if via == "gitter":
-            bot.send_report(m, "markdown")
-    return 0
+# @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+# @click.option(
+#     "--owner",
+#     default="inveniosoftware",
+#     help="The repo owner we plan to offer the service to.",
+# )
+# @click.option(
+#     "--repo", multiple=True, help="The repositories to check for notifications."
+# )
+# @click.option("--maintainer", multiple=True, help="The maintainers to notify.")
+# @click.option(
+#     "--via", default="gitter", help="Resource used for notification dispatch."
+# )
+# def send(owner, repo, maintainer, via):
+#     """Autobot report send CLI."""
+#     conf = Config.load(
+#         AUTOBOT_OWNER=owner,
+#         AUTOBOT_REPOS=[r for r in repo],
+#         AUTOBOT_MAINTAINERS=[m for m in maintainer],
+#         env=dotenv_path,
+#         ini=ini_path,
+#         defaults=True,
+#     )
+#     bot = BotAPI(conf)
+#     for m in conf.load_maintainers().keys():
+#         if via == "gitter":
+#             res = bot.send_report(m, "markdown")
+#             print(res)
+#     return 0
 
 
 main.add_command(report)
 
 report.add_command(show)
-report.add_command(send)
+# report.add_command(send)
 
 
 if __name__ == "__main__":

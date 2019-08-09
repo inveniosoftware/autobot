@@ -88,3 +88,12 @@ def config(info):
         AUTOBOT_GH_TOKEN="some gh token",
         AUTOBOT_GITTER_TOKEN="some gitter token",
     ).config
+
+
+@pytest.fixture
+def api(config):
+    """Configuration testing fixture."""
+    from autobot.config_loader import Config
+    from autobot.api import BotAPI
+
+    return BotAPI(config)
