@@ -13,7 +13,6 @@ import sys
 import os
 
 import click
-import yaml
 from github3 import login, repository
 
 from autobot.api import BotAPI
@@ -40,13 +39,13 @@ def report():
 @click.option(
     "--owner",
     default="inveniosoftware",
-    help="The repo owner we plan to offer the service to.",
+    help="The repo owner/organization the service is offered to.",
 )
 @click.option(
     "--repo", multiple=True, help="The repositories to check for notifications."
 )
 @click.option("--maintainer", multiple=True, help="The maintainers to notify.")
-@click.option("--format", default="json", help="The result format.")
+@click.option("--format", default="json", help="The report format.")
 def show(owner, repo, maintainer, format):
     """Autobot report show CLI."""
     conf = Config.load(
@@ -63,41 +62,41 @@ def show(owner, repo, maintainer, format):
     return 0
 
 
-# @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
-# @click.option(
-#     "--owner",
-#     default="inveniosoftware",
-#     help="The repo owner we plan to offer the service to.",
-# )
-# @click.option(
-#     "--repo", multiple=True, help="The repositories to check for notifications."
-# )
-# @click.option("--maintainer", multiple=True, help="The maintainers to notify.")
-# @click.option(
-#     "--via", default="gitter", help="Resource used for notification dispatch."
-# )
-# def send(owner, repo, maintainer, via):
-#     """Autobot report send CLI."""
-#     conf = Config.load(
-#         AUTOBOT_OWNER=owner,
-#         AUTOBOT_REPOS=[r for r in repo],
-#         AUTOBOT_MAINTAINERS=[m for m in maintainer],
-#         env=dotenv_path,
-#         ini=ini_path,
-#         defaults=True,
-#     )
-#     bot = BotAPI(conf)
-#     for m in conf.load_maintainers().keys():
-#         if via == "gitter":
-#             res = bot.send_report(m, "markdown")
-#             print(res)
-#     return 0
+@click.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.option(
+    "--owner",
+    default="inveniosoftware",
+    help="The repo owner/organization the service is offered to.",
+)
+@click.option(
+    "--repo", multiple=True, help="The repositories to check for notifications."
+)
+@click.option("--maintainer", multiple=True, help="The maintainers to notify.")
+@click.option(
+    "--via", default="gitter", help="Resource used for notification dispatch."
+)
+def send(owner, repo, maintainer, via):
+    """Autobot report send CLI."""
+    conf = Config.load(
+        AUTOBOT_OWNER=owner,
+        AUTOBOT_REPOS=[r for r in repo],
+        AUTOBOT_MAINTAINERS=[m for m in maintainer],
+        env=dotenv_path,
+        ini=ini_path,
+        defaults=True,
+    )
+    bot = BotAPI(conf)
+    for m in conf.maintainers.keys():
+        if via == "gitter":
+            res = bot.send_report(m, "markdown")
+            print(res)
+    return 0
 
 
 main.add_command(report)
 
 report.add_command(show)
-# report.add_command(send)
+report.add_command(send)
 
 
 if __name__ == "__main__":

@@ -103,3 +103,18 @@ class Config(dict):
                 for repo in res.keys()
             }
         return {r: m for r, m in res.items() if m}
+
+    @classmethod
+    def invert_list_dict(cls, d):
+        """Invert dictionary `d`."""
+        keys = list(set([k for val in d.values() for k in val]))
+        res = dict.fromkeys(keys)
+        for k in res.keys():
+            res[k] = [val for (val, l) in d.items() if k in l]
+        return res
+
+    @property
+    def maintainers(self):
+        """Load repository.yml file into dictionary with maintainers as keys."""
+        info = self.repositories
+        return self.invert_list_dict(info)

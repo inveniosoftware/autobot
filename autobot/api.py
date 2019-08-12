@@ -8,19 +8,11 @@
 
 """Autobot API."""
 
-import json
-from string import Template
-
 import yaml
+import copy
 
 from autobot.config_loader import Config
 from autobot.github import GitHubAPI
-
-# config = Config(...)
-# api = BotAPI(config)
-# api.generate_report(maintaine='slint')
-# md_report = BotAPI.report2md(report)
-
 
 class BotAPI:
     """Bot's API."""
@@ -32,101 +24,50 @@ class BotAPI:
             self.config["AUTOBOT_OWNER"],
             self.config["AUTOBOT_GH_TOKEN"],
             self.config.repositories
-        ).report(self.config.repositories())
-
-    def generate_report(self, **kwargs):
-        """Rearranges and returns the report."""
-        report = []
-        maintainer = kwargs.get("maintainer", None)
-        for r in self.report[0]["repos"]:
-            exclude = ["actions"]
-            rreport = {
-                "actions": {},
-                "repo": {key: val for (key, val) in r.items() if key not in exclude},
-            }
-            for ra in r["actions"]:
-                if "prs" in ra.keys():
-                    for pr in ra["prs"]:
-                        for pra in pr["actions"]:
-                            if "comments" in pra.keys():
-                                continue
-                            for key in pra.keys():
-                                if key not in rreport["actions"].keys():
-                                    rreport["actions"][key] = []
-                                if (not maintainer) or (maintainer in pra[key]):
-                                    rreport["actions"][key].append(
-                                        {
-                                            "maintainers": pra[key],
-                                            "pr": {
-                                                key: val
-                                                for (key, val) in pr.items()
-                                                if key not in exclude
-                                            },
-                                        }
-                                    )
-                if "issues" in ra.keys():
-                    for issue in ra["issues"]:
-                        for ia in issue["actions"]:
-                            if "comments" in ia.keys():
-                                continue
-                            for key in ia.keys():
-                                if key not in rreport["actions"].keys():
-                                    rreport["actions"][key] = []
-                                if (not maintainer) or (maintainer in ia[key]):
-                                    rreport["actions"][key].append(
-                                        {
-                                            "maintainers": ia[key],
-                                            "issue": {
-                                                key: val
-                                                for (key, val) in issue.items()
-                                                if key not in exclude
-                                            },
-                                        }
-                                    )
-            report.append(rreport)
-        return report
+        ).report()
 
     @classmethod
     def md_report(cls, report):
         """Returns the report in markdown format."""
-        res = ""
-        for rreport in report:
-            res += f"### [{rreport['repo']['url'].split('/')[-1]}]({rreport['repo']['url']})\n"
-            for (action, targets) in rreport["actions"].items():
-                res += f"- {action}\n"
+        md_report = ""
+        for repo in report.keys():
+            repo_report = report[repo]
+            md_report += f"\n### [{repo_report['url'].split('/')[-1]}]({repo_report['url']})\n"
+            for (action, targets) in repo_report["actions"].items():
+                md_report += f"- **{action}**\n"
                 for target in targets:
-                    if "pr" in target.keys():
-                        res += (
-                            f"  - {target['pr']['url']}: {target['pr']['title']} "
-                            f"({target['pr']['creation_date'].date()})\n"
-                        )
-                    elif "issue" in target.keys():
-                        res += (
-                            f"  - {target['issue']['url']}: {target['issue']['title']} "
-                            f"({target['issue']['creation_date'].date()})\n"
-                        )
-                    else:
-                        continue
-        return res
+                    md_report += (
+                        f"  - {target['url']}: {target['title']} "
+                        f"({target['creation_date'].date()})\n"
+                    )
+        return md_report
 
     def formatted_report(self, format):
         """Returns the report in the specified format."""
-        res = self.generate_report()
         if format == "json":
-            return res
+            return self.report
         elif format == "yaml":
-            return yaml.dump(res)
+            return yaml.dump(self.report)
         elif format == "markdown":
-            return self.md_report(res)
-        return res
+            return self.md_report(self.report)
+        return self.report
+
+    def generate_report(self, maintainer: str):
+        """Returns the report in markdown format."""
+        report = copy.deepcopy(self.report)
+        for repo in self.report.keys():
+            repo_report = report[repo]
+            if maintainer not in repo_report["maintainers"]:
+                del report[repo]
+        return report
 
     def send_report(self, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
-        res = self.generate_report(maintainer=maintainer)
+        report = self.generate_report(maintainer=maintainer)
         if format == "json":
-            return res
+            return report
         elif format == "yaml":
-            return yaml.dump(res)
+            return yaml.dump(report)
         elif format == "markdown":
-            return self.md_report(res)
-        return res
+            return self.md_report(report)
+        return report
