@@ -37,11 +37,9 @@ for name, reqs in extras_require.items():
 setup_requires = ["pytest-runner>=2.6.2"]
 
 install_requires = [
-    "black>=19.3b0",
     "click>=7.0",
     "datetime>=4.3",
     "github3.py>=0.9.3",
-    "isort>=4.3.21",
     "lazy-load>=0.8.2",
     "python-dotenv>=0.10.3",
     "pytz>=2019.2",
