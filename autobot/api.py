@@ -36,7 +36,8 @@ class BotAPI:
                 lines.append(f"- **{action}**")
                 for target in targets:
                     lines.append(
-                        f"  - {target['url']}: {target['title']} ({target['creation_date'].date()})"
+                        f"  - {target['url']}: {target['title']} "
+                        f"({target['creation_date'].date()})"
                     )
         return "\n".join(lines)
 
