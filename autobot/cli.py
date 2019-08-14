@@ -18,10 +18,6 @@ from github3 import login, repository
 from autobot.api import BotAPI
 from autobot.config_loader import Config
 
-dotenv_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), ".env")
-
-ini_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), "config.ini")
-
 
 @click.group(context_settings=dict(help_option_names=["-h", "--help"]))
 def main():
@@ -38,23 +34,37 @@ def report():
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
     "--owner",
+    "-o",
     default="inveniosoftware",
     help="The repo owner/organization the service is offered to.",
 )
 @click.option(
-    "--repo", multiple=True, help="The repositories to check for notifications."
+    "--repo", "-r", multiple=True, help="The repositories to check for notifications."
 )
-@click.option("--maintainer", multiple=True, help="The maintainers to notify.")
-@click.option("--format", default="json", help="The report format.")
-def show(owner, repo, maintainer, format):
+@click.option("--maintainer", "-m", multiple=True, help="The maintainers to notify.")
+@click.option(
+    "--dotenv_config",
+    "-e",
+    default=Config.dotenv_path,
+    type=click.Path(),
+    help="The .env file to load configurations.",
+)
+@click.option(
+    "--ini_config",
+    "-i",
+    default=Config.ini_path,
+    type=click.Path(),
+    help="The .ini file to load configurations.",
+)
+@click.option("--format", "-f", default="json", help="The report format.")
+def show(owner, repo, maintainer, dotenv_config, ini_config, format):
     """Autobot report show CLI."""
-    conf = Config.load(
+    conf = Config(
         AUTOBOT_OWNER=owner,
         AUTOBOT_REPOS=[r for r in repo],
         AUTOBOT_MAINTAINERS=[m for m in maintainer],
-        env=dotenv_path,
-        ini=ini_path,
-        defaults=True,
+        dotenv=dotenv_config,
+        ini=ini_config,
     )
     bot = BotAPI(conf)
     res = bot.formatted_report(format)
@@ -65,25 +75,39 @@ def show(owner, repo, maintainer, format):
 @click.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option(
     "--owner",
+    "-o",
     default="inveniosoftware",
     help="The repo owner/organization the service is offered to.",
 )
 @click.option(
-    "--repo", multiple=True, help="The repositories to check for notifications."
+    "--repo", "-r", multiple=True, help="The repositories to check for notifications."
 )
-@click.option("--maintainer", multiple=True, help="The maintainers to notify.")
+@click.option("--maintainer", "-m", multiple=True, help="The maintainers to notify.")
 @click.option(
-    "--via", default="gitter", help="Resource used for notification dispatch."
+    "--dotenv_config",
+    "-e",
+    default=True,
+    type=click.Path(),
+    help="The .env file to load configurations.",
 )
-def send(owner, repo, maintainer, via):
+@click.option(
+    "--ini_config",
+    "-i",
+    default=True,
+    type=click.Path(),
+    help="The .ini file to load configurations.",
+)
+@click.option(
+    "--via", "-v", default="gitter", help="Resource used for notification dispatch."
+)
+def send(owner, repo, maintainer, dotenv_config, ini_config, via):
     """Autobot report send CLI."""
-    conf = Config.load(
+    conf = Config(
         AUTOBOT_OWNER=owner,
         AUTOBOT_REPOS=[r for r in repo],
         AUTOBOT_MAINTAINERS=[m for m in maintainer],
-        env=dotenv_path,
-        ini=ini_path,
-        defaults=True,
+        dotenv=dotenv_config,
+        ini=ini_config,
     )
     bot = BotAPI(conf)
     for m in conf.maintainers.keys():

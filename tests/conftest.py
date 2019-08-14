@@ -87,6 +87,8 @@ def config(info):
         AUTOBOT_INFO_PATH=info,
         AUTOBOT_GH_TOKEN="some gh token",
         AUTOBOT_GITTER_TOKEN="some gitter token",
+        ini=True,
+        # defaults=True,
     )
 
 

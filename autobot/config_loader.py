@@ -20,52 +20,49 @@ import autobot.config as config
 class Config(dict):
     """Interact with configuration variables."""
 
-    def __init__(self, *arg, **kw):
+    dotenv_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), ".env")
+
+    ini_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), "config.ini")
+
+    def __init__(self, dotenv=None, ini=None, defaults=True, *arg, **kw):
         """Initialize configuration."""
-        super(Config, self).__init__(*arg, **kw)
+        super(Config, self).__init__()
+        self.update(self.load(dotenv=dotenv, ini=ini, defaults=defaults, *arg, **kw))
 
     @classmethod
-    def load(cls, env=None, ini=None, defaults=None, *arg, **kw):
+    def load(cls, dotenv=None, ini=None, defaults=True, *arg, **kw):
         """Load configuration."""
-        conf = cls(*arg, **kw)
-        if env:
-            env_conf = {
-                key: val
-                for (key, val) in cls.env_config(env).items()
-                if key not in conf.keys()
-            }
-            conf.update(env_conf)
-        if ini:
-            ini_conf = {
-                key: val
-                for (key, val) in cls.ini_config(ini).items()
-                if key not in conf.keys()
-            }
-            conf.update(ini_conf)
+        conf = {}
         if defaults:
-            py_conf = {
-                key: val
-                for (key, val) in cls.py_config().items()
-                if key not in conf.keys()
-            }
+            py_conf = cls.py_config()
             conf.update(py_conf)
+        if dotenv:
+            dotenv_conf = (
+                cls.dotenv_config()
+                if isinstance(dotenv, bool)
+                else cls.dotenv_config(dotenv)
+            )
+            conf.update(dotenv_conf)
+        if ini:
+            ini_conf = (
+                cls.ini_config() if isinstance(ini, bool) else cls.ini_config(ini)
+            )
+            conf.update(ini_conf)
+        user_defined_conf = {
+            key: val for (key, val) in kw.items() if key in conf.keys()
+        }
+        conf.update(user_defined_conf)
         return conf
 
     @classmethod
-    def env_config(cls, path=None, prefix="AUTOBOT_"):
+    def dotenv_config(cls, path=dotenv_path, prefix="AUTOBOT_"):
         """Get autobot configuration values from .env file."""
-        if not path:
-            path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), ".env")
         return dotenv_values(path)
 
     @classmethod
-    def ini_config(cls, path=None):
+    def ini_config(cls, path=ini_path):
         """Get autobot configuration values from config.ini file."""
         ini_parser = ConfigParser()
-        if not path:
-            path = os.path.join(
-                os.path.abspath(os.path.join(__file__, "..")), "config.ini"
-            )
         ini_parser.optionxform = str
         ini_parser.read(path)
         return ini_parser["AUTOBOT"]
