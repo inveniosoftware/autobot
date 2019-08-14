@@ -9,8 +9,8 @@
 
 """CLI commands."""
 
-import sys
 import os
+import sys
 
 import click
 from github3 import login, repository

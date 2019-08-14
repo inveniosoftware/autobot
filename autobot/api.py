@@ -8,11 +8,13 @@
 
 """Autobot API."""
 
-import yaml
 import copy
+
+import yaml
 
 from autobot.config_loader import Config
 from autobot.github import GitHubAPI
+
 
 class BotAPI:
     """Bot's API."""
@@ -24,25 +26,26 @@ class BotAPI:
     @classmethod
     def md_report(cls, report):
         """Returns the report in markdown format."""
-        md_report = ""
+        lines = []
         for repo in report.keys():
             repo_report = report[repo]
-            md_report += f"\n### [{repo_report['url'].split('/')[-1]}]({repo_report['url']})\n"
+            lines.append(
+                f"\n### [{repo_report['url'].split('/')[-1]}]({repo_report['url']})"
+            )
             for (action, targets) in repo_report["actions"].items():
-                md_report += f"- **{action}**\n"
+                lines.append(f"- **{action}**")
                 for target in targets:
-                    md_report += (
-                        f"  - {target['url']}: {target['title']} "
-                        f"({target['creation_date'].date()})\n"
+                    lines.append(
+                        f"  - {target['url']}: {target['title']} ({target['creation_date'].date()})"
                     )
-        return md_report
+        return "\n".join(lines)
 
     def generate_report(self, **kw):
         """Returns the report in markdown format."""
         report = GitHubAPI(
             self.config["AUTOBOT_OWNER"],
             self.config["AUTOBOT_GH_TOKEN"],
-            self.config.repositories
+            self.config.repositories,
         ).report()
         maintainer = kw.get("maintainer", None)
         if not maintainer:

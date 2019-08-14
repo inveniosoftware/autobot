@@ -16,6 +16,7 @@ from lazy_load import lazy_func
 
 from autobot.config_loader import Config
 
+
 class GHWrapper:
     """GitHub object wrapper."""
 
@@ -47,7 +48,7 @@ class PR(GHWrapper):
 
     def can_merge(self):
         """Check if pull request can be merged."""
-        sha = self.statuses_url.rsplit('/', 1)[-1]
+        sha = self.statuses_url.rsplit("/", 1)[-1]
         statuses = list(self.repository.statuses(sha))
         return "error" not in [s.state for s in statuses]
 
@@ -59,8 +60,8 @@ class PR(GHWrapper):
     def can_close(self):
         """Check if pull request can be closed."""
         return (
-            (datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at).days >= 3 * 30
-        )
+            datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at
+        ).days >= 3 * 30
 
     # def needs_comment(self):
     #     """Check if pull request needs comment."""
@@ -122,8 +123,8 @@ class Issue(GHWrapper):
     def can_close(self):
         """Check if issue can be closed."""
         return (
-            (datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at).days >= 3 * 30
-        )
+            datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at
+        ).days >= 3 * 30
 
     def lbls(self):
         """Fetch issue's labels."""
@@ -154,9 +155,10 @@ class Issue(GHWrapper):
     def actions(self):
         """The suitable actions for the issue."""
         actions = []
-        if self.status['can_close'] and not 'RFC' in self.status["lbls"]:
-            actions.append('Close this!')
+        if self.status["can_close"] and not "RFC" in self.status["lbls"]:
+            actions.append("Close this!")
         return actions
+
 
 class GitHubAPI:
     """Perform requests for the target repositories."""

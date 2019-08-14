@@ -9,9 +9,9 @@
 """Performs project's configuration loading."""
 
 import os
-import yaml
 from configparser import ConfigParser
 
+import yaml
 from dotenv.main import dotenv_values
 
 import autobot.config as config
@@ -81,9 +81,7 @@ class Config(dict):
 
     def load_repositories_yml(self):
         """Load repositories.yml file."""
-        return yaml.load(open(self["AUTOBOT_INFO_PATH"]))["orgs"][
-            self["AUTOBOT_OWNER"]
-        ]
+        return yaml.load(open(self["AUTOBOT_INFO_PATH"]))["orgs"][self["AUTOBOT_OWNER"]]
 
     @property
     def repositories(self):
