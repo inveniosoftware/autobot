@@ -20,11 +20,6 @@ class BotAPI:
     def __init__(self, config: Config):
         """Bot initialization."""
         self.config = config
-        self.report = GitHubAPI(
-            self.config["AUTOBOT_OWNER"],
-            self.config["AUTOBOT_GH_TOKEN"],
-            self.config.repositories
-        ).report()
 
     @classmethod
     def md_report(cls, report):
@@ -42,24 +37,32 @@ class BotAPI:
                     )
         return md_report
 
+    def generate_report(self, **kw):
+        """Returns the report in markdown format."""
+        report = GitHubAPI(
+            self.config["AUTOBOT_OWNER"],
+            self.config["AUTOBOT_GH_TOKEN"],
+            self.config.repositories
+        ).report()
+        maintainer = kw.get("maintainer", None)
+        if not maintainer:
+            return report
+        maintainer_report = copy.deepcopy(report)
+        for repo in report:
+            repo_report = report[repo]
+            if maintainer not in repo_report["maintainers"]:
+                del maintainer_report[repo]
+        return maintainer_report
+
     def formatted_report(self, format):
         """Returns the report in the specified format."""
         if format == "json":
-            return self.report
+            return self.generate_report()
         elif format == "yaml":
-            return yaml.dump(self.report)
+            return yaml.dump(self.generate_report())
         elif format == "markdown":
-            return self.md_report(self.report)
-        return self.report
-
-    def generate_report(self, maintainer: str):
-        """Returns the report in markdown format."""
-        report = copy.deepcopy(self.report)
-        for repo in self.report.keys():
-            repo_report = report[repo]
-            if maintainer not in repo_report["maintainers"]:
-                del report[repo]
-        return report
+            return self.md_report(self.generate_report())
+        return self.generate_report()
 
     def send_report(self, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
