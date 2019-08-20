@@ -28,9 +28,10 @@ class GHWrapper:
 class PR(GHWrapper):
     """Pull request wrapper."""
 
-    def __init__(self, pr):
+    def __init__(self, pr, maintainers=None):
         """Pull request wrapper object initialization."""
         self._gh_obj = pr
+        self.maintainers = maintainers
 
     @property
     def info(self):
@@ -46,6 +47,21 @@ class PR(GHWrapper):
             "related_issue": self.issue_url,
         }
 
+    def is_open(self):
+        """Check if puul request is open."""
+        return self.state == "open"
+
+    def can_close(self):
+        """Check if pull request can be closed."""
+        return (
+            datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at
+        ).days >= 3 * 30
+
+    def needs_comment(self):
+        """Check if pull request needs comment."""
+        comments = [comment for comment in self.comments()]
+        return not comments or comments[-1].user.login not in self.maintainers
+
     def can_merge(self):
         """Check if pull request can be merged."""
         sha = self.statuses_url.rsplit("/", 1)[-1]
@@ -57,25 +73,7 @@ class PR(GHWrapper):
         reviews = [r for r in self.reviews()]
         return len(reviews) == 0
 
-    def can_close(self):
-        """Check if pull request can be closed."""
-        return (
-            datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at
-        ).days >= 3 * 30
-
-    # def needs_comment(self):
-    #     """Check if pull request needs comment."""
-    #     comments = [comment for comment in self.comments()]
-    #     return (
-    #         comments and comments[-1].user.login not in maintainers
-    #     )
-
-    filters = [
-        can_merge,
-        needs_review,
-        can_close,
-        # needs_comment,
-    ]
+    filters = [is_open, can_close, needs_comment, can_merge, needs_review]
 
     @property
     def status(self):
@@ -89,19 +87,26 @@ class PR(GHWrapper):
     def actions(self):
         """The suitable actions for the pull request."""
         actions = []
-        if self.status["can_merge"] and not self.status["needs_review"]:
+        if not self.status["is_open"]:
+            return actions
+        if self.status["needs_review"]:
+            actions.append("Review this!")
+        elif self.status["can_merge"]:
             actions.append("Merge this!")
-        if self.status["can_close"] and not self.status["can_merge"]:
+        elif self.status["can_close"]:
             actions.append("Close this!")
+        elif self.statusp["needs_comment"]:
+            actions.append("Comment on this!")
         return actions
 
 
 class Issue(GHWrapper):
     """Issue wrapper object."""
 
-    def __init__(self, issue):
+    def __init__(self, issue, maintainers=None):
         """Issue wrapper object initialization."""
         self._gh_obj = issue
+        self.maintainers = maintainers
 
     @property
     def info(self):
@@ -120,28 +125,26 @@ class Issue(GHWrapper):
             ],
         }
 
+    def is_open(self):
+        """Check if issue is open."""
+        return self.state == "open"
+
     def can_close(self):
         """Check if issue can be closed."""
         return (
             datetime.utcnow().replace(tzinfo=pytz.utc) - self.updated_at
         ).days >= 3 * 30
 
+    def needs_comment(self):
+        """Check if issue needs comment."""
+        comments = [comment for comment in self.comments()]
+        return not comments or comments[-1].user.login not in self.maintainers
+
     def lbls(self):
         """Fetch issue's labels."""
         return [l.name for l in self.labels()]
 
-    # def needs_comment(self):
-    #     """Check if pull request needs comment."""
-    #     comments = [comment for comment in self.comments()]
-    #     return (
-    #         comments and comments[-1].user.login not in maintainers
-    #     )
-
-    filters = [
-        can_close,
-        lbls,
-        # needs_comment,
-    ]
+    filters = [is_open, can_close, needs_comment, lbls]
 
     @property
     def status(self):
@@ -155,8 +158,12 @@ class Issue(GHWrapper):
     def actions(self):
         """The suitable actions for the issue."""
         actions = []
+        if not self.status["is_open"]:
+            return actions
         if self.status["can_close"] and not "RFC" in self.status["lbls"]:
             actions.append("Close this!")
+        elif self.status["needs_comment"]:
+            actions.append("Comment on this!")
         return actions
 
 
@@ -188,13 +195,13 @@ class GitHubAPI:
         }
 
     @classmethod
-    def repo_report(cls, repo):
+    def repo_report(cls, repo, maintainers):
         """Check a repository for possible actions."""
         repo_report = {}
         for pr in repo.pull_requests():
             if pr.state != "open":
                 continue
-            pr_wrapper = PR(pr)
+            pr_wrapper = PR(pr, maintainers)
             actions = pr_wrapper.actions
             for a in actions:
                 if a not in repo_report.keys():
@@ -203,7 +210,7 @@ class GitHubAPI:
         for issue in repo.issues():
             if issue.state != "open":
                 continue
-            issue_wrapper = Issue(issue)
+            issue_wrapper = Issue(issue, maintainers)
             actions = issue_wrapper.actions
             for a in actions:
                 if a not in repo_report.keys():
@@ -213,13 +220,14 @@ class GitHubAPI:
 
     @lazy_func
     def report(self):
-        """Check repositories `repos` for possible actions."""
+        """Check repositories for possible actions."""
         report = {}
         for repo in self.repositories.keys():
             repo_obj = self.gh.repository(self.owner, repo)
-            repo_report = self.repo_report(repo_obj)
+            maintainers = self.repositories[repo]
+            repo_report = self.repo_report(repo_obj, maintainers)
             if repo_report:
                 report[repo] = self.repo_info(repo_obj)
-                report[repo]["maintainers"] = self.repositories[repo]
+                report[repo]["maintainers"] = maintainers
                 report[repo]["actions"] = repo_report
         return report
