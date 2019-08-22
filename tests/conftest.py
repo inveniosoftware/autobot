@@ -15,7 +15,7 @@ import pytz
 import yaml
 from mock import MagicMock
 
-from autobot.github import Issue
+from autobot.github import PR, Issue
 
 
 @pytest.fixture(scope="session")
@@ -304,92 +304,93 @@ def issue_comment_1(user_2, label_3, comment_1, comment_2):
     )
 
 
-# from autobot.github import PR
-
-# @pytest.fixture
-# def pr_closed(user_2):
-#     return PR(MagicMock(
-#         **{
-#             "number": 1,
-#             "html_url": "pr/closed/url",
-#             "title": "pr_closed",
-#             "created_at": datetime(
-#                 year=2015,
-#                 month=7,
-#                 day=23,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "updated_at": datetime(
-#                 year=2018,
-#                 month=1,
-#                 day=30,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "body": "Pull request that is already closed.",
-#             "state": "closed",
-#             "user": user_2,
-#             "issue_url": "issue/closed/url",
-#             "reviews": lambda: [
-#                 "review1",
-#                 "review2"
-#             ],
-#         }
-#     ))
+@pytest.fixture
+def pr_closed(user_2):
+    """Already closed pull request."""
+    return PR(
+        MagicMock(
+            **{
+                "number": 1,
+                "html_url": "pr/closed/url",
+                "title": "pr_closed",
+                "created_at": datetime(year=2015, month=7, day=23, tzinfo=pytz.utc),
+                "updated_at": datetime(year=2018, month=1, day=30, tzinfo=pytz.utc),
+                "body": "Pull request that is already closed.",
+                "state": "closed",
+                "user": user_2,
+                "issue_url": "issue/closed/url",
+                "reviews": lambda: ["review1", "review2"],
+                "comments": lambda: [],
+            }
+        ),
+        ["user_1"],
+    )
 
 
-# @pytest.fixture
-# def pr_close_1(user_1):
-#     return PR(MagicMock(
-#         **{
-#             "number": 2,
-#             "html_url": "pr/close/1/url",
-#             "title": "pr_close_1",
-#             "created_at": datetime(
-#                 year=2015,
-#                 month=7,
-#                 day=23,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "updated_at": datetime(
-#                 year=2018,
-#                 month=1,
-#                 day=30,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "body": "Pull request that is already closed.",
-#             "state": "open",
-#             "user": user_1,
-#             "issue_url": "issue/close/1/url",
-#             "reviews": lambda: [
-#                 "review1"
-#             ],
-#         }
-#     ))
+@pytest.fixture
+def pr_close_1(user_1, comment_1):
+    """Pull request that should be closed."""
+    return PR(
+        MagicMock(
+            **{
+                "number": 2,
+                "html_url": "pr/close/1/url",
+                "title": "pr_close_1",
+                "created_at": datetime(year=2015, month=7, day=23, tzinfo=pytz.utc),
+                "updated_at": datetime(year=2018, month=1, day=30, tzinfo=pytz.utc),
+                "body": "Pull request that is already closed.",
+                "state": "open",
+                "user": user_1,
+                "issue_url": "issue/close/1/url",
+                "reviews": lambda: ["review1"],
+                "comments": lambda: [comment_1],
+            }
+        ),
+        ["user_2"],
+    )
 
 
-# @pytest.fixture
-# def pr_review_1(user_2):
-#     return PR(MagicMock(
-#         **{
-#             "number": 3,
-#             "html_url": "pr/review/1/url",
-#             "title": "pr_review_1",
-#             "created_at": datetime(
-#                 year=2016,
-#                 month=7,
-#                 day=23,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "updated_at": datetime(
-#                 year=2019,
-#                 month=8,
-#                 day=5,
-#                 tzinfo=pytz.utc,
-#             ),
-#             "body": "Pull request that needs review.",
-#             "state": "open",
-#             "user": user_2,
-#             "issue_url": "issue/review/1/url",
-#             "reviews": lambda: [],
-#         }
-#     ))
+@pytest.fixture
+def pr_review_1(user_2, comment_1):
+    """Pull request that needs review."""
+    return PR(
+        MagicMock(
+            **{
+                "number": 3,
+                "html_url": "pr/review/1/url",
+                "title": "pr_review_1",
+                "created_at": datetime(year=2016, month=7, day=23, tzinfo=pytz.utc),
+                "updated_at": datetime(year=2019, month=8, day=5, tzinfo=pytz.utc),
+                "body": "Pull request that needs review.",
+                "state": "open",
+                "user": user_2,
+                "issue_url": "issue/review/1/url",
+                "reviews": lambda: [],
+                "comments": lambda: [comment_1],
+            }
+        ),
+        ["user_1"],
+    )
+
+
+@pytest.fixture
+def pr_comment_1(user_2, comment_1, comment_2):
+    """Pull request that needs comment."""
+    return PR(
+        MagicMock(
+            **{
+                "number": 3,
+                "html_url": "pr/review/1/url",
+                "title": "pr_review_1",
+                "created_at": datetime(year=2016, month=7, day=23, tzinfo=pytz.utc),
+                "updated_at": datetime(year=2019, month=8, day=5, tzinfo=pytz.utc),
+                "body": "Pull request that needs review.",
+                "state": "open",
+                "user": user_2,
+                "issue_url": "issue/review/1/url",
+                "reviews": lambda: ["review1"],
+                "comments": lambda: [comment_1, comment_2],
+            }
+        ),
+        ["user_1"],
+    )

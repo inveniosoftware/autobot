@@ -11,6 +11,10 @@
 import os
 import sys
 
+from mock import patch
+
+from autobot.github import PR
+
 
 def test_config(config):
     """Check configuration content."""
@@ -43,7 +47,7 @@ def test_issue_closed(issue_closed):
     assert isinstance(issue_closed.status, dict)
     assert not issue_closed.status["is_open"]
     assert issue_closed.status["can_close"]
-    assert issue_closed.status["needs_comment"]
+    assert not issue_closed.status["needs_comment"]
     assert "RFC" not in issue_closed.status["lbls"]
     assert not issue_closed.actions
 
@@ -103,29 +107,80 @@ def test_issue_comment_1(issue_comment_1):
     assert issue_comment_1.actions[0] == "Comment on this!"
 
 
-# def test_pr_closed(pr_closed):
-#     """Check closed pull request."""
-#     assert isinstance(pr_closed.info, dict)
-#     assert isinstance(pr_closed.status, dict)
-#     assert not pr_closed.status["is_open"]
-#     assert not pr_closed.actions
+def test_pr_closed(pr_closed):
+    """Check closed pull request."""
+    assert isinstance(pr_closed.actions, list)
+    assert isinstance(pr_closed.maintainers, list)
+    assert isinstance(pr_closed.info, dict)
+    assert isinstance(pr_closed.status, dict)
+    assert not pr_closed.status["is_open"]
+    assert pr_closed.status["can_close"]
+    assert not pr_closed.status["needs_comment"]
+    assert not pr_closed.status["needs_review"]
+    with patch.object(PR, "can_merge", return_value=True):
+        assert pr_closed.status["can_merge"]
+        assert not pr_closed.actions
+    # with patch.object(PR, 'can_merge', return_value=False):
+    #     assert not pr_closed.status["can_merge"]
+    #     assert not pr_closed.actions
 
 
-# def test_pr_close_1(pr_close_1):
-#     """Check pull request that should be closed."""
-#     assert isinstance(pr_close_1.info, dict)
-#     assert isinstance(pr_close_1.status, dict)
-#     assert pr_close_1.status["is_open"]
-#     assert pr_close_1.status["can_close"]
-#     assert len(pr_close_1.actions) == 1
-#     assert pr_close_1.actions[0] == "Close this!"
+def test_pr_close_1(pr_close_1):
+    """Check pull request that should be closed."""
+    assert isinstance(pr_close_1.actions, list)
+    assert isinstance(pr_close_1.maintainers, list)
+    assert isinstance(pr_close_1.info, dict)
+    assert isinstance(pr_close_1.status, dict)
+    assert pr_close_1.status["is_open"]
+    assert pr_close_1.status["can_close"]
+    assert pr_close_1.status["needs_comment"]
+    assert not pr_close_1.status["needs_review"]
+    with patch.object(PR, "can_merge", return_value=True):
+        assert pr_close_1.status["can_merge"]
+        assert len(pr_close_1.actions) == 1
+        assert pr_close_1.actions[0] == "Merge this!"
+    # with patch.object(PR, 'can_merge', return_value=False):
+    #     assert not pr_close_1.status["can_merge"]
+    #     assert len(pr_close_1.actions) == 1
+    #     assert pr_close_1.actions[0] == "Close this!"
 
 
-# def test_pr_review_1(pr_review_1):
-#     """Check pull request that needs review."""
-#     assert isinstance(pr_review_1.info, dict)
-#     assert isinstance(pr_review_1.status, dict)
-#     assert pr_review_1.status["is_open"]
-#     assert pr_review_1.status["needs_review"]
-#     assert len(pr_review_1.actions) == 1
-#     assert pr_review_1.actions[0] == "Review this!"
+def test_pr_review_1(pr_review_1):
+    """Check pull request that needs review."""
+    assert isinstance(pr_review_1.actions, list)
+    assert isinstance(pr_review_1.maintainers, list)
+    assert isinstance(pr_review_1.info, dict)
+    assert isinstance(pr_review_1.status, dict)
+    assert pr_review_1.status["is_open"]
+    assert not pr_review_1.status["can_close"]
+    assert not pr_review_1.status["needs_comment"]
+    assert pr_review_1.status["needs_review"]
+    with patch.object(PR, "can_merge", return_value=True):
+        assert pr_review_1.status["can_merge"]
+        assert len(pr_review_1.actions) == 1
+        assert pr_review_1.actions[0] == "Review this!"
+    # with patch.object(PR, 'can_merge', return_value=False):
+    #     assert not pr_review_1.status["can_merge"]
+    #     assert len(pr_review_1.actions) == 1
+    #     assert pr_review_1.actions[0] == "Review this!"
+
+
+def test_pr_comment_1(pr_comment_1):
+    """Check pull request that needs comment."""
+    assert isinstance(pr_comment_1.actions, list)
+    assert isinstance(pr_comment_1.maintainers, list)
+    assert isinstance(pr_comment_1.info, dict)
+    assert isinstance(pr_comment_1.status, dict)
+    assert pr_comment_1.status["is_open"]
+    assert not pr_comment_1.status["can_close"]
+    assert pr_comment_1.status["needs_comment"]
+    assert not pr_comment_1.status["needs_review"]
+    with patch.object(PR, "can_merge", return_value=True):
+        assert pr_comment_1.status["can_merge"]
+        assert len(pr_comment_1.actions) == 2
+        assert "Comment on this!" in pr_comment_1.actions
+        assert "Merge this!" in pr_comment_1.actions
+    # with patch.object(PR, 'can_merge', return_value=False):
+    #     assert not pr_review_1.status["can_merge"]
+    #     assert len(pr_review_1.actions) == 1
+    #     assert pr_review_1.actions[0] == "Review this!"

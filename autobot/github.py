@@ -60,7 +60,7 @@ class PR(GHWrapper):
     def needs_comment(self):
         """Check if pull request needs comment."""
         comments = [comment for comment in self.comments()]
-        return not comments or comments[-1].user.login not in self.maintainers
+        return comments and comments[-1].user.login not in self.maintainers
 
     def can_merge(self):
         """Check if pull request can be merged."""
@@ -89,14 +89,18 @@ class PR(GHWrapper):
         actions = []
         if not self.status["is_open"]:
             return actions
-        if self.status["needs_review"]:
-            actions.append("Review this!")
-        elif self.status["can_merge"]:
-            actions.append("Merge this!")
-        elif self.status["can_close"]:
-            actions.append("Close this!")
-        elif self.statusp["needs_comment"]:
-            actions.append("Comment on this!")
+        if not self.status["can_close"]:
+            if self.status["needs_comment"]:
+                actions.append("Comment on this!")
+            if self.status["needs_review"]:
+                actions.append("Review this!")
+            elif self.status["can_merge"]:
+                actions.append("Merge this!")
+        else:
+            if self.status["can_merge"] and not self.status["needs_review"]:
+                actions.append("Merge this!")
+            else:
+                actions.append("Close this!")
         return actions
 
 
@@ -138,7 +142,7 @@ class Issue(GHWrapper):
     def needs_comment(self):
         """Check if issue needs comment."""
         comments = [comment for comment in self.comments()]
-        return not comments or comments[-1].user.login not in self.maintainers
+        return comments and comments[-1].user.login not in self.maintainers
 
     def lbls(self):
         """Fetch issue's labels."""
