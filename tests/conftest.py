@@ -320,7 +320,7 @@ def pr_closed(user_2):
                 "user": user_2,
                 "issue_url": "issue/closed/url",
                 "reviews": lambda: ["review1", "review2"],
-                "comments": lambda: [],
+                "review_comments": lambda: [],
             }
         ),
         ["user_1"],
@@ -343,7 +343,7 @@ def pr_close_1(user_1, comment_1):
                 "user": user_1,
                 "issue_url": "issue/close/1/url",
                 "reviews": lambda: ["review1"],
-                "comments": lambda: [comment_1],
+                "review_comments": lambda: [comment_1],
             }
         ),
         ["user_2"],
@@ -366,7 +366,7 @@ def pr_review_1(user_2, comment_1):
                 "user": user_2,
                 "issue_url": "issue/review/1/url",
                 "reviews": lambda: [],
-                "comments": lambda: [comment_1],
+                "review_comments": lambda: [comment_1],
             }
         ),
         ["user_1"],
@@ -389,7 +389,7 @@ def pr_comment_1(user_2, comment_1, comment_2):
                 "user": user_2,
                 "issue_url": "issue/review/1/url",
                 "reviews": lambda: ["review1"],
-                "comments": lambda: [comment_1, comment_2],
+                "review_comments": lambda: [comment_1, comment_2],
             }
         ),
         ["user_1"],

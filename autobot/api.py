@@ -22,33 +22,33 @@ class BotAPI:
     def __init__(self, config: Config):
         """Bot initialization."""
         self.config = config
+        self.gh_api = GitHubAPI(
+            self.config["AUTOBOT_OWNER"],
+            self.config["AUTOBOT_GH_TOKEN"],
+            self.config.repositories,
+        )
 
     @classmethod
     def md_report(cls, report):
         """Returns the report in markdown format."""
         lines = []
-        for repo in report.keys():
-            repo_report = report[repo]
+        for repo_report in report.values():
             lines.append(
-                f"\n### [{repo_report['url'].split('/')[-1]}]({repo_report['url']})"
+                f"### [{repo_report['url'].split('/')[-1]}]({repo_report['url']})"
             )
-            for (action, targets) in repo_report["actions"].items():
+            for action, targets in repo_report["actions"].items():
                 lines.append(f"- **{action}**")
                 for target in targets:
                     lines.append(
                         f"  - {target['url']}: {target['title']} "
                         f"({target['creation_date'].date()})"
                     )
+            lines.append("\n\n")
         return "\n".join(lines)
 
-    def generate_report(self, **kw):
+    def generate_report(self, maintainer=None):
         """Returns the report in markdown format."""
-        report = GitHubAPI(
-            self.config["AUTOBOT_OWNER"],
-            self.config["AUTOBOT_GH_TOKEN"],
-            self.config.repositories,
-        ).report()
-        maintainer = kw.get("maintainer", None)
+        report = self.gh_api.report()
         if not maintainer:
             return report
         maintainer_report = copy.deepcopy(report)
@@ -58,7 +58,7 @@ class BotAPI:
                 del maintainer_report[repo]
         return maintainer_report
 
-    def formatted_report(self, format):
+    def format_report(self, format):
         """Returns the report in the specified format."""
         if format == "json":
             return self.generate_report()

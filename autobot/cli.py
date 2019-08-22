@@ -67,7 +67,7 @@ def show(owner, repo, maintainer, dotenv_config, ini_config, format):
         ini=ini_config,
     )
     bot = BotAPI(conf)
-    res = bot.formatted_report(format)
+    res = bot.format_report(format)
     print(res)
     return 0
 

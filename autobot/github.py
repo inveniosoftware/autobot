@@ -59,7 +59,7 @@ class PR(GHWrapper):
 
     def needs_comment(self):
         """Check if pull request needs comment."""
-        comments = [comment for comment in self.comments()]
+        comments = [comment for comment in self.review_comments()]
         return comments and comments[-1].user.login not in self.maintainers
 
     def can_merge(self):
@@ -87,6 +87,13 @@ class PR(GHWrapper):
     def actions(self):
         """The suitable actions for the pull request."""
         actions = []
+        # print(self.info)
+        # print(self.is_open())
+        # print(self.can_close())
+        # print(self.needs_comment())
+        # print(self.can_merge())
+        # print(self.needs_review())
+        # print(self.status["is_open"])
         if not self.status["is_open"]:
             return actions
         if not self.status["can_close"]:
