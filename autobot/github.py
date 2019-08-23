@@ -15,6 +15,7 @@ from github3 import login, repository
 from lazy_load import lazy_func
 
 from autobot.config_loader import Config
+from autobot.utils import cached_property
 
 
 class GHWrapper:
@@ -87,13 +88,6 @@ class PR(GHWrapper):
     def actions(self):
         """The suitable actions for the pull request."""
         actions = []
-        # print(self.info)
-        # print(self.is_open())
-        # print(self.can_close())
-        # print(self.needs_comment())
-        # print(self.can_merge())
-        # print(self.needs_review())
-        # print(self.status["is_open"])
         if not self.status["is_open"]:
             return actions
         if not self.status["can_close"]:

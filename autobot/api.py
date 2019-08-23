@@ -9,11 +9,11 @@
 """Autobot API."""
 
 import copy
+import json
+from datetime import datetime
 
 import yaml
-import json
 
-from datetime import datetime
 from autobot.config_loader import Config
 from autobot.github import GitHubAPI
 

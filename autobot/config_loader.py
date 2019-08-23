@@ -17,6 +17,7 @@ from dotenv.main import dotenv_values
 import autobot.config as config
 from autobot.utils import cached_property
 
+
 class Config(dict):
     """Interact with configuration variables."""
 
@@ -80,7 +81,7 @@ class Config(dict):
         """Load repositories.yml file."""
         with open(self["AUTOBOT_INFO_PATH"]) as fp:
             data = yaml.load(fp)
-        return data['orgs'][self['AUTOBOT_OWNER']]
+        return data["orgs"][self["AUTOBOT_OWNER"]]
 
     @cached_property
     def repositories(self):

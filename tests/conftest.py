@@ -15,8 +15,8 @@ import pytz
 import yaml
 from mock import MagicMock
 
-from autobot.config_loader import Config
 from autobot.api import BotAPI
+from autobot.config_loader import Config
 from autobot.github import PR, Issue
 
 
