@@ -38,13 +38,11 @@ setup_requires = ["pytest-runner>=2.6.2"]
 
 install_requires = [
     "click>=7.0",
-    "datetime>=4.3",
     "github3.py>=0.9.3",
     "lazy-load>=0.8.2",
     "python-dotenv>=0.10.3",
     "pytz>=2019.2",
     "PyYAML>=3.13",
-    "setuptools>=41.0.1",
 ]
 
 setup(

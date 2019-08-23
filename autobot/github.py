@@ -74,14 +74,16 @@ class PR(GHWrapper):
         reviews = [r for r in self.reviews()]
         return len(reviews) == 0
 
-    filters = [is_open, can_close, needs_comment, can_merge, needs_review]
-
-    @property
+    @cached_property
     def status(self):
         """The status of the pull request."""
-        status = {}
-        for f in self.filters:
-            status[f.__name__] = f(self)
+        status = {
+            "is_open": self.is_open(),
+            "can_close": self.can_close(),
+            "needs_comment": self.needs_comment(),
+            "can_merge": self.can_merge(),
+            "needs_review": self.needs_review(),
+        }
         return status
 
     @property
@@ -149,14 +151,15 @@ class Issue(GHWrapper):
         """Fetch issue's labels."""
         return [l.name for l in self.labels()]
 
-    filters = [is_open, can_close, needs_comment, lbls]
-
-    @property
+    @cached_property
     def status(self):
-        """The status of the issue."""
-        status = {}
-        for f in self.filters:
-            status[f.__name__] = f(self)
+        """The status of the pull request."""
+        status = {
+            "is_open": self.is_open(),
+            "can_close": self.can_close(),
+            "needs_comment": self.needs_comment(),
+            "lbls": self.lbls(),
+        }
         return status
 
     @property

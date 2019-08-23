@@ -11,6 +11,7 @@ include *.sh
 include *.txt
 include LICENSE
 include .editorconfig
+include pytest.ini
 
 recursive-include tests *
 recursive-exclude * __pycache__

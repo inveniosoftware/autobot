@@ -25,11 +25,6 @@ class Config(dict):
 
     ini_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), "config.ini")
 
-    # def __init__(self, dotenv=None, ini=None, defaults=True, *arg, **kw):
-    #     """Initialize configuration."""
-    #     super(Config, self).__init__()
-    #     self.update(self.load(dotenv=dotenv, ini=ini, defaults=defaults, *arg, **kw))
-
     @classmethod
     def load(cls, dotenv=None, ini=None, defaults=True, *arg, **kw):
         """Load configuration."""
