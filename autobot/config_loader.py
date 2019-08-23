@@ -15,7 +15,7 @@ import yaml
 from dotenv.main import dotenv_values
 
 import autobot.config as config
-
+from autobot.utils import cached_property
 
 class Config(dict):
     """Interact with configuration variables."""
@@ -24,15 +24,15 @@ class Config(dict):
 
     ini_path = os.path.join(os.path.abspath(os.path.join(__file__, "..")), "config.ini")
 
-    def __init__(self, dotenv=None, ini=None, defaults=True, *arg, **kw):
-        """Initialize configuration."""
-        super(Config, self).__init__()
-        self.update(self.load(dotenv=dotenv, ini=ini, defaults=defaults, *arg, **kw))
+    # def __init__(self, dotenv=None, ini=None, defaults=True, *arg, **kw):
+    #     """Initialize configuration."""
+    #     super(Config, self).__init__()
+    #     self.update(self.load(dotenv=dotenv, ini=ini, defaults=defaults, *arg, **kw))
 
     @classmethod
     def load(cls, dotenv=None, ini=None, defaults=True, *arg, **kw):
         """Load configuration."""
-        conf = {}
+        conf = cls()
         if defaults:
             py_conf = cls.py_config()
             conf.update(py_conf)
@@ -78,9 +78,11 @@ class Config(dict):
 
     def load_repositories_yml(self):
         """Load repositories.yml file."""
-        return yaml.load(open(self["AUTOBOT_INFO_PATH"]))["orgs"][self["AUTOBOT_OWNER"]]
+        with open(self["AUTOBOT_INFO_PATH"]) as fp:
+            data = yaml.load(fp)
+        return data['orgs'][self['AUTOBOT_OWNER']]
 
-    @property
+    @cached_property
     def repositories(self):
         """Load repositories.yml file into dictionary with repositories as keys."""
         info = self.load_repositories_yml()

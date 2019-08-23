@@ -15,6 +15,8 @@ import pytz
 import yaml
 from mock import MagicMock
 
+from autobot.config_loader import Config
+from autobot.api import BotAPI
 from autobot.github import PR, Issue
 
 
@@ -86,9 +88,7 @@ def info(tmpdir_factory):
 @pytest.fixture
 def config(info):
     """Configuration testing fixture."""
-    from autobot.config_loader import Config
-
-    return Config(
+    return Config.load(
         AUTOBOT_OWNER="org1",
         AUTOBOT_INFO_PATH=info,
         AUTOBOT_GH_TOKEN="some gh token",
@@ -100,9 +100,6 @@ def config(info):
 @pytest.fixture
 def api(config):
     """Bot API testing fixture."""
-    from autobot.config_loader import Config
-    from autobot.api import BotAPI
-
     return BotAPI(config)
 
 

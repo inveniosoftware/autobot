@@ -59,7 +59,7 @@ def report():
 @click.option("--format", "-f", default="json", help="The report format.")
 def show(owner, repo, maintainer, dotenv_config, ini_config, format):
     """Autobot report show CLI."""
-    conf = Config(
+    conf = Config.load(
         AUTOBOT_OWNER=owner,
         AUTOBOT_REPOS=[r for r in repo],
         AUTOBOT_MAINTAINERS=[m for m in maintainer],
@@ -102,7 +102,7 @@ def show(owner, repo, maintainer, dotenv_config, ini_config, format):
 )
 def send(owner, repo, maintainer, dotenv_config, ini_config, via):
     """Autobot report send CLI."""
-    conf = Config(
+    conf = Config.load(
         AUTOBOT_OWNER=owner,
         AUTOBOT_REPOS=[r for r in repo],
         AUTOBOT_MAINTAINERS=[m for m in maintainer],
