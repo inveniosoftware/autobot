@@ -11,7 +11,9 @@
 import copy
 
 import yaml
+import json
 
+from datetime import datetime
 from autobot.config_loader import Config
 from autobot.github import GitHubAPI
 
@@ -51,22 +53,24 @@ class BotAPI:
         report = self.gh_api.report()
         if not maintainer:
             return report
-        maintainer_report = copy.deepcopy(report)
+        maintainer_report = {}
         for repo in report:
             repo_report = report[repo]
             if maintainer not in repo_report["maintainers"]:
-                del maintainer_report[repo]
+                continue
+            maintainer_report.update(repo_report)
         return maintainer_report
 
     def format_report(self, format):
         """Returns the report in the specified format."""
+        report = self.generate_report()
         if format == "json":
-            return self.generate_report()
+            return json.dumps(report, indent=4, default=str)
         elif format == "yaml":
-            return yaml.dump(self.generate_report())
+            return yaml.dump(report)
         elif format == "markdown":
-            return self.md_report(self.generate_report())
-        return self.generate_report()
+            return self.md_report(report)
+        return report
 
     def send_report(self, maintainer: str, format: str):
         """Send the report to a maintainer (on Gitter or via email)."""
