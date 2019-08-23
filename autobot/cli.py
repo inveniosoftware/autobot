@@ -67,7 +67,7 @@ def show(owner, repo, maintainer, dotenv_config, ini_config, format):
         ini=ini_config,
     )
     bot = BotAPI(conf)
-    res = bot.format_report(format)
+    res = BotAPI.format_report(bot.generate_report(), format)
     print(res)
     return 0
 
@@ -86,14 +86,14 @@ def show(owner, repo, maintainer, dotenv_config, ini_config, format):
 @click.option(
     "--dotenv_config",
     "-e",
-    default=True,
+    default=Config.dotenv_path,
     type=click.Path(),
     help="The .env file to load configurations.",
 )
 @click.option(
     "--ini_config",
     "-i",
-    default=True,
+    default=Config.ini_path,
     type=click.Path(),
     help="The .ini file to load configurations.",
 )
@@ -111,9 +111,7 @@ def send(owner, repo, maintainer, dotenv_config, ini_config, via):
     )
     bot = BotAPI(conf)
     for m in conf.maintainers.keys():
-        if via == "gitter":
-            res = bot.send_report(m, "markdown")
-            print(res)
+        bot.send_report(m, via)
     return 0
 
 

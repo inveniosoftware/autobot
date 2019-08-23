@@ -8,7 +8,7 @@
 
 """Autobot API."""
 
-import copy
+import requests
 import json
 from datetime import datetime
 
@@ -48,6 +48,17 @@ class BotAPI:
             lines.append("\n\n")
         return "\n".join(lines)
 
+    @classmethod
+    def format_report(cls, report, format):
+        """Returns the report in the specified format."""
+        if format == "json":
+            return json.dumps(report, indent=4, default=str)
+        elif format == "yaml":
+            return yaml.dump(report)
+        elif format == "markdown":
+            return cls.md_report(report)
+        return report
+
     def generate_report(self, maintainer=None):
         """Returns the report in markdown format."""
         report = self.gh_api.report()
@@ -61,24 +72,21 @@ class BotAPI:
             maintainer_report.update(repo_report)
         return maintainer_report
 
-    def format_report(self, format):
-        """Returns the report in the specified format."""
-        report = self.generate_report()
-        if format == "json":
-            return json.dumps(report, indent=4, default=str)
-        elif format == "yaml":
-            return yaml.dump(report)
-        elif format == "markdown":
-            return self.md_report(report)
-        return report
-
-    def send_report(self, maintainer: str, format: str):
+    def send_report(self, maintainer: str, via: str):
         """Send the report to a maintainer (on Gitter or via email)."""
         report = self.generate_report(maintainer=maintainer)
-        if format == "json":
-            return report
-        elif format == "yaml":
-            return yaml.dump(report)
-        elif format == "markdown":
-            return self.md_report(report)
-        return report
+        print(report)
+        if via == "gitter":
+            room = requests.post(
+                'https://api.gitter.im/v1/rooms',
+                json={'uri': maintainer},
+                headers={'Authorization': f'Bearer {self.config["AUTOBOT_GITTER_TOKEN"]}'},
+            )
+            room_id = room.json()['id']
+            md_report = self.format_report(report, "markdown")
+            print(md_report)
+            requests.post(
+                f"https://api.gitter.im/v1/rooms/:{room_id}/chatMessages",
+                json={"text": md_report},
+                headers={'Authorization': f'Bearer {self.config["AUTOBOT_GITTER_TOKEN"]}'},
+            )
