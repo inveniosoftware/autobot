@@ -1,11 +1,6 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-#
-# This file is part of Autobot.
-# Copyright (C) 2015-2018 CERN.
-#
-# Autobot is free software; you can redistribute it and/or modify it
-# under the terms of the MIT License; see LICENSE file for more details.
+# SPDX-FileCopyrightText: 2015-2018 CERN.
+# SPDX-License-Identifier: MIT
 
 """CLI commands."""
 
