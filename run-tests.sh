@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 black --check . && \
-isort -rc -c -df && \
-check-manifest --ignore ".travis-*" && \
+isort -c . && \
 pydocstyle autobot tests docs && \
 sphinx-build -qnNW docs docs/_build/html && \
-python setup.py test
+pytest
