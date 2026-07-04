@@ -178,16 +178,24 @@ class GitHubAPI:
         actions = {"review_comments": []}
         for comment in pr.review_comments():
             report = self.comment_report(comment, maintainers)
-            actions["review_comments"].append(
-                {**{"actions": report}, **self.fetch_comment_info(comment)}
-            ) if report else None
+            (
+                actions["review_comments"].append(
+                    {**{"actions": report}, **self.fetch_comment_info(comment)}
+                )
+                if report
+                else None
+            )
         res.append(actions) if actions["review_comments"] else None
         actions = {"issue_comments": []}
         for comment in pr.issue_comments():
             report = self.comment_report(comment, maintainers)
-            actions["issue_comments"].append(
-                {**{"actions": report}, **self.fetch_comment_info(comment)}
-            ) if report else None
+            (
+                actions["issue_comments"].append(
+                    {**{"actions": report}, **self.fetch_comment_info(comment)}
+                )
+                if report
+                else None
+            )
         res.append(actions) if actions["issue_comments"] else None
         return res
 
@@ -199,9 +207,13 @@ class GitHubAPI:
         actions = {"comments": []}
         for comment in issue.comments():
             report = self.comment_report(comment, maintainers)
-            actions["comments"].append(
-                {**{"actions": report}, **self.fetch_comment_info(comment)}
-            ) if report else None
+            (
+                actions["comments"].append(
+                    {**{"actions": report}, **self.fetch_comment_info(comment)}
+                )
+                if report
+                else None
+            )
         res.append(actions) if actions["comments"] else None
         return res
 
@@ -213,18 +225,24 @@ class GitHubAPI:
             if pr.state != "open":
                 continue
             report = self.pr_report(pr, maintainers)
-            actions["prs"].append(
-                {**{"actions": report}, **self.fetch_pr_info(pr)}
-            ) if report else None
+            (
+                actions["prs"].append({**{"actions": report}, **self.fetch_pr_info(pr)})
+                if report
+                else None
+            )
         res.append(actions) if actions["prs"] else None
         actions = {"issues": []}
         for issue in repo.issues():
             if issue.state != "open":
                 continue
             report = self.issue_report(issue, maintainers)
-            actions["issues"].append(
-                {**{"actions": report}, **self.fetch_issue_info(issue)}
-            ) if report else None
+            (
+                actions["issues"].append(
+                    {**{"actions": report}, **self.fetch_issue_info(issue)}
+                )
+                if report
+                else None
+            )
         res.append(actions) if actions["issues"] else None
         return res
 
@@ -236,8 +254,12 @@ class GitHubAPI:
         for repo in repos:
             repo_obj = self.GH_CLIENT.repository(self.OWNER, repo)
             report = self.repo_report(repo_obj, repos[repo])
-            actions["repos"].append(
-                {**{"actions": report}, **self.fetch_repo_info(repo_obj)}
-            ) if report else None
+            (
+                actions["repos"].append(
+                    {**{"actions": report}, **self.fetch_repo_info(repo_obj)}
+                )
+                if report
+                else None
+            )
         res.append(actions) if actions["repos"] else None
         return res

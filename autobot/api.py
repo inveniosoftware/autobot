@@ -35,7 +35,7 @@ class BotAPI:
         """Send the report to a maintainer (on Gitter or via email)."""
         res = cls.generate_report(maintainer)
         if format == "markdown":
-            """ TO DO """
+            """TO DO"""
 
     @classmethod
     def load_repositories_yml(cls):
