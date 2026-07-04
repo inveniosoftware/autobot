@@ -34,9 +34,9 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"Autobot"
-copyright = u"2015-2019, CERN"
-author = u"CERN"
+project = "Autobot"
+copyright = "2015-2019, CERN"
+author = "CERN"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -112,7 +112,7 @@ latex_elements = {
 # (source start file, target name, title, author, documentclass
 # [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, "autobot.tex", u"Autobot Documentation", u"CERN", "manual")
+    (master_doc, "autobot.tex", "Autobot Documentation", "CERN", "manual")
 ]
 
 
@@ -120,7 +120,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "autobot", u"Autobot Documentation", [author], 1)]
+man_pages = [(master_doc, "autobot", "Autobot Documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------
@@ -132,7 +132,7 @@ texinfo_documents = [
     (
         master_doc,
         "autobot",
-        u"Autobot Documentation",
+        "Autobot Documentation",
         author,
         "autobot",
         "One line description of project.",
